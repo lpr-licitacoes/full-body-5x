@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>Full Body 5x</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+header{background:#111827;color:white;padding:20px 16px;position:sticky;top:0;z-index:5}
+h1{margin:0;font-size:24px}.sub{opacity:.75;margin-top:5px;font-size:13px}
+main{max-width:700px;margin:auto;padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:14px}
+button,.tab{border:0;border-radius:12px;padding:12px 14px;font-weight:bold;cursor:pointer}
+.tab{background:white;color:#374151;white-space:nowrap}.tab.active{background:#111827;color:white}
+.card{background:white;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px #00000010}
+.daytitle{font-size:19px;font-weight:bold;margin-bottom:4px}.focus{color:#6b7280;font-size:13px;margin-bottom:14px}
+.exercise{border-top:1px solid #e5e7eb;padding:14px 0}.exercise:first-child{border-top:0}
+.exname{font-weight:bold;font-size:16px}.meta{font-size:13px;color:#6b7280;margin:5px 0 10px}
+.inputs{display:flex;gap:8px}.inputs input{width:0;flex:1;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:15px}
+.check{background:#16a34a;color:white;min-width:82px}.done{opacity:.55}.done .exname{text-decoration:line-through}
+.timer{background:#111827;color:white;border-radius:16px;padding:16px;text-align:center;margin-bottom:12px}
+.time{font-size:38px;font-weight:bold;margin:5px}.timer button{background:white;color:#111827;margin:4px}
+.primary{width:100%;background:#111827;color:white;margin-top:8px}.secondary{background:#e5e7eb;color:#111827}
+.progress{height:9px;background:#e5e7eb;border-radius:10px;overflow:hidden;margin:10px 0}.bar{height:100%;background:#16a34a;width:0}
+.small{font-size:12px;color:#6b7280}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f9fafb;border-radius:12px;padding:14px}.stat b{display:block;font-size:22px}
+</style>
+</head>
+<body>
+<header><h1>FULL BODY 5x</h1><div class="sub">Treino • cargas • descanso • evolução</div></header>
+<main>
+<div class="tabs" id="tabs"></div>
+<div id="app"></div>
+</main>
+<script>
+const workouts={
+"SEG":{title:"SEGUNDA — FULL BODY A",focus:"Força + quadríceps",run:false,ex:[
+["Agachamento livre","3","6–8","2 min"],["Supino reto com barra","3","6–8","2 min"],["Remada curvada com barra","3","8–10","1:30–2 min"],["Cadeira extensora","2","12–15","60–75s"],["Elevação lateral","2","12–15","60s"],["Rosca direta com barra","2","10–12","60s"],["Tríceps corda","2","10–12","60s"],["Abdominal com rolinho","2","10–12","60s"]]},
+"TER":{title:"TERÇA — FULL BODY B",focus:"Superior + posterior moderado + corrida",run:true,ex:[
+["Leg press 45°","3","10–12","1:30"],["Puxada frontal aberta","3","8–10","1:30"],["Supino inclinado com halteres","3","8–10","1:30"],["Stiff com barra","2","8–10","1:30–2 min"],["Elevação lateral","2","12–15","60s"],["Rosca direta","2","10–12","60s"],["Tríceps corda","2","10–12","60s"],["Abdominal declinado com peso","2","12–15","60s"]]},
+"QUA":{title:"QUARTA — FULL BODY C",focus:"Posterior + costas",run:false,ex:[
+["Hack squat","3","8–10","2 min"],["Remada unilateral com halter","3","8–10","1:30"],["Desenvolvimento com halteres sentado","3","8–10","1:30"],["Stiff com barra","3","8–10","2 min"],["Crucifixo na máquina","2","12–15","60–75s"],["Panturrilha no leg press","3","12–15","60–75s"],["Tríceps testa com halter","2","10–12","60s"],["Abdominal infra na barra","2","10–15","60s"]]},
+"QUI":{title:"QUINTA — FULL BODY D",focus:"Superior + pernas leves + corrida",run:true,ex:[
+["Cadeira extensora","2","12–15","60s"],["Puxada frontal aberta","3","10–12","1:15"],["Supino inclinado com halteres","2","10–12","1:15"],["Leg press 45°","2","12","1:15"],["Elevação lateral","3","12–15","60s"],["Rosca direta","2","10–12","60s"],["Tríceps testa","2","10–12","60s"],["Abdominal declinado","2","12–15","60s"]]},
+"SEX":{title:"SEXTA — FULL BODY E",focus:"Corpo inteiro + hipertrofia",run:false,ex:[
+["Levantamento terra com barra","2","6–8","2–3 min"],["Supino reto com barra","3","8–10","1:30–2 min"],["Remada curvada com barra","3","8–10","1:30–2 min"],["Hack squat","2","10–12","1:30"],["Desenvolvimento com halteres","2","10–12","1:30"],["Crucifixo na máquina","2","12–15","60s"],["Rosca direta","2","10–12","60s"],["Tríceps corda","2","10–12","60s"],["Panturrilha","2","12–15","60s"]]}
+};
+let day="SEG", timer=null, secs=0, completed={};
+const key=(d,i)=>"fb_"+d+"_"+i;
+function loadDone(d,i){return localStorage.getItem(key(d,i))==="1"}
+function renderTabs(){document.getElementById("tabs").innerHTML=Object.keys(workouts).map(d=>`<button class="tab ${d===day?"active":""}" onclick="day='${d}';render()">${d}</button>`).join("")}
+function render(){
+renderTabs();let w=workouts[day], done=0;
+let exhtml=w.ex.map((e,i)=>{let d=loadDone(day,i);if(d)done++;return `<div class="exercise ${d?"done":""}" id="ex${i}">
+<div class="exname">${i+1}. ${e[0]}</div><div class="meta">${e[1]} séries × ${e[2]} repetições • descanso ${e[3]}</div>
+<div class="inputs"><input id="c${i}" placeholder="Carga (kg)" inputmode="decimal" value="${localStorage.getItem("load_"+day+"_"+i)||""}" onchange="localStorage.setItem('load_${day}_${i}',this.value)"><input id="r${i}" placeholder="Reps" inputmode="numeric"><button class="check" onclick="toggle(${i})">${d?"✓ Feito":"Concluir"}</button></div>
+</div>`}).join("");
+document.getElementById("app").innerHTML=`<div class="card"><div class="daytitle">${w.title}</div><div class="focus">${w.focus}</div><div class="small">${done}/${w.ex.length} exercícios concluídos</div><div class="progress"><div class="bar" style="width:${done/w.ex.length*100}%"></div></div></div>
+<div class="timer"><div>CRONÔMETRO DE DESCANSO</div><div class="time" id="time">${fmt(secs)}</div><button onclick="start(60)">1:00</button><button onclick="start(90)">1:30</button><button onclick="start(120)">2:00</button><button onclick="start(180)">3:00</button><button onclick="stop()">Parar</button></div>
+<div class="card">${exhtml}</div>
+${w.run?'<div class="card"><b>Corrida — esteira</b><p class="small">Após a musculação. Intensidade moderada, conforme a proposta do treino.</p></div>':''}
+<div class="card"><b>Regras de progressão</b><p class="small">Nos exercícios compostos, mantenha cerca de 1–3 repetições em reserva. Ao atingir o topo da faixa com boa técnica, aumente gradualmente a carga.</p></div>`;
+}
+function toggle(i){let k=key(day,i);if(loadDone(day,i))localStorage.removeItem(k);else localStorage.setItem(k,"1");render()}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function start(s){clearInterval(timer);secs=s;document.getElementById("time").textContent=fmt(secs);timer=setInterval(()=>{secs--;document.getElementById("time").textContent=fmt(Math.max(0,secs));if(secs<=0){clearInterval(timer);navigator.vibrate?.([300,150,300]);alert("Descanso concluído!")}},1000)}
+function stop(){clearInterval(timer);secs=0;document.getElementById("time").textContent=fmt(secs)}
+render();
+</script>
+</body>
+</html>
