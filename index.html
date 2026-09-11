@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Full Body 3x + Coringa</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+header{background:#111827;color:#fff;padding:17px;position:sticky;top:0;z-index:10}
+h1{margin:0;font-size:22px}.sub{font-size:13px;opacity:.8;margin-top:4px}
+main{max-width:820px;margin:auto;padding:14px}
+.week,.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:12px}.week{flex-wrap:wrap}
+.week div,.tab{background:#fff;padding:10px;border-radius:10px;font-size:13px}.tab{border:0;font-weight:bold}.active{background:#111827!important;color:#fff}
+.card{background:#fff;padding:15px;border-radius:17px;margin-bottom:12px;box-shadow:0 2px 10px #00000010}
+.exercise{border-top:1px solid #e5e7eb;padding:16px 0}.exercise:first-child{border-top:0}
+.exhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.exname{font-weight:bold;font-size:16px}.arrow{border:0;background:#eef2ff;border-radius:10px;font-size:18px;width:42px;height:38px}
+.meta,.small{font-size:13px;color:#6b7280;margin:5px 0}
+.progress{height:9px;background:#e5e7eb;border-radius:8px;overflow:hidden}.bar{height:100%;background:#16a34a}
+.set{background:#f9fafb;border-radius:12px;padding:10px;margin:8px 0}.settitle{font-size:12px;font-weight:bold;margin-bottom:7px;color:#374151}
+.row{display:flex;gap:7px}.row input,.row select,textarea{border:1px solid #d1d5db;border-radius:10px;padding:10px;font-size:14px;background:#fff;width:100%}.row input{flex:1}
+textarea{min-height:70px;font-family:Arial;margin-top:7px}
+.check,.save,.historybtn,.altbtn{color:#fff;border:0;border-radius:10px;padding:11px;font-weight:bold;width:100%;margin-top:8px}
+.check{background:#16a34a}.save{background:#111827}.historybtn{background:#2563eb}.altbtn{background:#7c3aed}
+.done{opacity:.65}.done .exname{text-decoration:line-through}
+.timer{background:#111827;color:#fff;text-align:center;padding:15px;border-radius:17px;margin-bottom:12px}.time{font-size:36px;font-weight:bold}.timer button{margin:3px;padding:9px;border:0;border-radius:9px}
+.info{border-left:4px solid #2563eb;background:#eff6ff}.corinfo{border-left:4px solid #f59e0b;background:#fffbeb}
+.history{background:#f9fafb;border-radius:10px;padding:10px;margin-top:8px;font-size:13px}.hidden{display:none}
+.badge{display:inline-block;background:#e5e7eb;border-radius:8px;padding:4px 8px;font-size:11px;margin-left:5px}
+.alts{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:12px;margin-top:10px}.alts h4{margin:0 0 8px;color:#5b21b6}
+.altitem{background:#fff;border-radius:10px;padding:10px;margin:7px 0;border:1px solid #e5e7eb}.altitem b{display:block}.altitem span{font-size:12px;color:#6b7280}
+.altchosen{background:#ede9fe;border:1px solid #8b5cf6;padding:8px;border-radius:9px;margin-top:8px;font-size:13px;color:#5b21b6}
+.section-title{font-size:18px;font-weight:bold;margin-bottom:5px}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#111827">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+<header><h1>FULL BODY 3x + 🃏 CORINGA</h1><div class="sub">Hipertrofia • corrida • ênfase em bíceps e ombros</div></header>
+<main>
+<div class="week">
+<div><b>SEG</b><br>🏋️ Treino A</div>
+<div><b>TER</b><br>🏃 Corrida</div>
+<div><b>QUA</b><br>🏋️ Treino B</div>
+<div><b>QUI</b><br>🏃 Corrida</div>
+<div><b>SEX</b><br>🏋️ Treino C</div>
+<div><b>EXTRA</b><br>🃏 Coringa</div>
+<div><b>DOM</b><br>😴 Descanso</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div id="app"></div>
+</main>
+
+<script>
+const W={
+"A":{t:"TREINO A — SEGUNDA",f:"Ênfase: peito + ombros + bíceps. Full body completo.",type:"principal",e:[
+["Agachamento livre",3,"6–8","2 min"],
+["Supino reto com barra",3,"6–8","2 min"],
+["Remada curvada",3,"8–10","1:30–2 min"],
+["Desenvolvimento com halteres",3,"8–10","1:30"],
+["Elevação lateral",3,"12–15","60s"],
+["Rosca direta",3,"8–10","60–90s"],
+["Rosca inclinada",2,"10–12","60s"],
+["Tríceps corda",2,"10–12","60s"],
+["Abdominal com rolinho",2,"8–12","60s"]]},
+"B":{t:"TREINO B — QUARTA",f:"Ênfase: pernas + costas + deltoide posterior + bíceps.",type:"principal",e:[
+["Hack squat",3,"8–10","2 min"],
+["Stiff com barra",3,"8–10","2 min"],
+["Puxada frontal",3,"8–10","1:30"],
+["Supino inclinado com halteres",3,"8–10","1:30"],
+["Face pull",3,"12–15","60s"],
+["Elevação lateral",2,"12–20","60s"],
+["Rosca martelo",3,"10–12","60–90s"],
+["Panturrilha em pé",3,"10–15","60s"],
+["Abdominal infra",2,"10–15","60s"]]},
+"C":{t:"TREINO C — SEXTA",f:"Ênfase: costas + ombros + bíceps. Full body completo.",type:"principal",e:[
+["Leg press 45°",3,"10–12","1:30–2 min"],
+["Mesa flexora",3,"10–12","1:30"],
+["Remada curvada",3,"8–10","1:30–2 min"],
+["Puxada frontal pegada neutra",2,"10–12","1:30"],
+["Supino inclinado",3,"8–10","1:30"],
+["Desenvolvimento na máquina",2,"8–12","1:30"],
+["Elevação lateral",3,"12–20","60s"],
+["Rosca Scott",3,"8–12","60–90s"],
+["Tríceps corda",2,"10–12","60s"],
+["Panturrilha sentado",3,"12–15","60s"]]},
+"CORINGA":{t:"🃏 TREINO CORINGA — OPCIONAL",f:"Use somente quando estiver recuperado. Ênfase especial em ombros + bíceps + pontos fracos.",type:"cor",e:[
+["Elevação lateral",4,"12–20","60s"],
+["Desenvolvimento com halteres",3,"8–12","1:30"],
+["Face pull",3,"12–20","60s"],
+["Rosca direta",3,"8–12","60–90s"],
+["Rosca inclinada",3,"10–12","60–90s"],
+["Rosca martelo",2,"10–15","60s"],
+["Crucifixo inverso",2,"12–20","60s"],
+["Panturrilha",3,"12–20","60s"],
+["Abdominal na polia",3,"10–15","60s"]]}
+};
+
+const ALT={
+"Agachamento livre":[["Hack squat","Mais estável e forte para quadríceps"],["Agachamento no Smith","Boa estabilidade"],["Leg press 45°","Alternativa quando não houver rack"]],
+"Supino reto com barra":[["Supino reto com halteres","Alternativa direta"],["Chest press","Máquina"],["Supino no Smith","Mais estabilidade"]],
+"Supino inclinado com halteres":[["Supino inclinado no Smith","Alternativa estável"],["Chest press inclinado","Máquina"],["Supino inclinado com barra","Alternativa livre"]],
+"Supino inclinado":[["Supino inclinado com halteres","Alternativa direta"],["Chest press inclinado","Máquina"],["Supino inclinado no Smith","Mais estabilidade"]],
+"Remada curvada":[["Remada baixa","Cabo"],["Remada máquina articulada","Mais estabilidade"],["Remada apoiada no banco","Menos sobrecarga lombar"]],
+"Puxada frontal":[["Puxada neutra","Variação de pegada"],["Barra fixa assistida","Alternativa vertical"],["Puxada unilateral no cabo","Variação unilateral"]],
+"Puxada frontal pegada neutra":[["Puxada frontal aberta","Variação de pegada"],["Barra fixa assistida","Alternativa vertical"],["Puxada unilateral","Variação unilateral"]],
+"Stiff com barra":[["Terra romeno com halteres","Alternativa direta"],["Stiff no Smith","Mais estabilidade"],["Mesa flexora","Ênfase diferente nos posteriores"]],
+"Hack squat":[["Agachamento no Smith","Alternativa próxima"],["Leg press 45°","Boa substituição"],["Agachamento livre","Maior exigência técnica"]],
+"Leg press 45°":[["Hack squat","Alternativa próxima"],["Agachamento no Smith","Boa substituição"],["Agachamento livre","Maior exigência técnica"]],
+"Mesa flexora":[["Mesa flexora unilateral","Variação unilateral"],["Flexora sentada","Alternativa"],["Stiff leve","Padrão diferente"]],
+"Desenvolvimento com halteres":[["Desenvolvimento na máquina","Mais estabilidade"],["Desenvolvimento no Smith","Alternativa"],["Arnold press","Variação"]],
+"Desenvolvimento na máquina":[["Desenvolvimento com halteres","Alternativa livre"],["Desenvolvimento no Smith","Alternativa"],["Arnold press","Variação"]],
+"Elevação lateral":[["Elevação lateral na máquina","Tensão constante"],["Elevação lateral no cabo","Boa curva de resistência"],["Elevação lateral unilateral","Maior controle"]],
+"Face pull":[["Crucifixo inverso","Deltoide posterior"],["Reverse peck deck","Máquina"],["Elevação posterior com halteres","Alternativa livre"]],
+"Crucifixo inverso":[["Reverse peck deck","Máquina"],["Face pull","Cabo"],["Elevação posterior com halteres","Alternativa livre"]],
+"Rosca direta":[["Rosca barra W","Conforto para punhos"],["Rosca no cabo","Tensão constante"],["Rosca alternada","Unilateral"]],
+"Rosca inclinada":[["Rosca alternada","Alternativa direta"],["Rosca no cabo","Tensão constante"],["Rosca concentrada","Maior isolamento"]],
+"Rosca martelo":[["Rosca martelo no cabo","Tensão constante"],["Rosca corda","Cabo"],["Rosca cruzada","Variação"]],
+"Rosca Scott":[["Rosca no banco Scott com halteres","Unilateral"],["Rosca máquina","Mais estabilidade"],["Rosca no cabo","Alternativa"]],
+"Tríceps corda":[["Tríceps barra no pulley","Alternativa direta"],["Tríceps francês","Ênfase cabeça longa"],["Tríceps máquina","Mais estabilidade"]],
+"Panturrilha em pé":[["Panturrilha no leg press","Alternativa"],["Panturrilha sentado","Mais ênfase no sóleo"],["Máquina em pé","Alternativa"]],
+"Panturrilha sentado":[["Panturrilha em pé","Mais gastrocnêmio"],["Panturrilha no leg press","Alternativa"],["Máquina sentado","Alternativa"]],
+"Panturrilha":[["Panturrilha em pé","Alternativa"],["Panturrilha sentado","Alternativa"],["Panturrilha no leg press","Alternativa"]],
+"Abdominal com rolinho":[["Prancha","Alternativa simples"],["Abdominal na polia","Sobrecarga"],["Dead bug","Controle do core"]],
+"Abdominal infra":[["Elevação de joelhos","Alternativa"],["Reverse crunch","Alternativa"],["Elevação de pernas no banco","Alternativa"]],
+"Abdominal na polia":[["Abdominal máquina","Mais estabilidade"],["Abdominal declinado","Alternativa"],["Crunch no solo","Mais simples"]]
+};
+
+let d="A",timer=null,sec=0;
+const key=(d,i,s,f)=>`fb3_${d}_${i}_${s}_${f}`;
+const get=k=>localStorage.getItem(k)||"";
+const set=(k,v)=>localStorage.setItem(k,v);
+
+function currentName(i){return get(`chosen_${d}_${i}`)||W[d].e[i][0]}
+function exerciseId(name){return name.replace(/[^a-zA-Z0-9]/g,"_")}
+function historyKey(i){return "history_fb3_"+exerciseId(currentName(i))}
+
+function chooseAlt(i,name){
+ const original=W[d].e[i][0];
+ set(`chosen_${d}_${i}`,name);
+ set(`obs_${d}_${i}`,`Substituição: ${original} → ${name}. `);
+ render();
+}
+
+function saveHistory(i){
+ const ex=W[d].e[i],sets=[];
+ for(let s=1;s<=ex[1];s++)sets.push({kg:get(key(d,i,s,"kg")),reps:get(key(d,i,s,"reps"))});
+ const obs=get(`obs_${d}_${i}`),dif=get(`dif_${d}_${i}`);
+ if(!sets.some(x=>x.kg||x.reps)&&!obs&&!dif){alert("Registre algum dado antes de salvar.");return}
+ const hist=JSON.parse(localStorage.getItem(historyKey(i))||"[]");
+ hist.unshift({date:new Date().toLocaleString("pt-BR"),sets,obs,dif,name:currentName(i)});
+ localStorage.setItem(historyKey(i),JSON.stringify(hist.slice(0,50)));
+ alert("Execução registrada no histórico!");
+ render();
+}
+
+function showHistory(i){
+ const hist=JSON.parse(localStorage.getItem(historyKey(i))||"[]"),box=document.getElementById(`hist_${i}`);
+ if(!hist.length){box.innerHTML="<div class='history'>Ainda não há histórico registrado para este exercício.</div>";box.classList.remove("hidden");return}
+ box.innerHTML=hist.slice(0,6).map(h=>{
+ const ss=h.sets.map((x,n)=>`S${n+1}: ${x.kg||"—"} kg × ${x.reps||"—"}`).join(" | ");
+ return `<div class='history'><b>${h.date}</b><br>${ss}${h.dif?`<br>Dificuldade: ${h.dif}`:""}${h.obs?`<br>📝 ${h.obs}`:""}</div>`;
+ }).join("");box.classList.remove("hidden");
+}
+
+function toggleAlt(i){document.getElementById(`alts_${i}`).classList.toggle("hidden")}
+
+function render(){
+ tabs.innerHTML=Object.keys(W).map(x=>`<button class="tab ${x===d?"active":""}" onclick="d='${x}';render()">${x==="CORINGA"?"🃏 CORINGA":"TREINO "+x}</button>`).join("");
+ const w=W[d],done=w.e.filter((_,i)=>get(`done_${d}_${i}`)==="1").length;
+
+ const exercises=w.e.map((e,i)=>{
+ const original=e[0],name=currentName(i),chosen=name!==original;
+ let sets="";
+ for(let s=1;s<=e[1];s++)sets+=`<div class="set"><div class="settitle">SÉRIE ${s}<span class="badge">${e[2]} reps</span></div><div class="row"><input placeholder="Peso (kg)" inputmode="decimal" value="${get(key(d,i,s,"kg"))}" onchange="set('${key(d,i,s,"kg")}',this.value)"><input placeholder="Repetições feitas" inputmode="numeric" value="${get(key(d,i,s,"reps"))}" onchange="set('${key(d,i,s,"reps")}',this.value)"></div></div>`;
+ const alternatives=(ALT[original]||[]).map(a=>`<div class="altitem"><b>${a[0]}</b><span>${a[1]}</span><button class="altbtn" onclick="chooseAlt(${i},'${a[0]}')">Usar esta alternativa hoje</button></div>`).join("")||"<div class='small'>Nenhuma alternativa cadastrada ainda.</div>";
+
+ return `<div class="exercise ${get(`done_${d}_${i}`)==="1"?"done":""}">
+ <div class="exhead"><div><div class="exname">${i+1}. ${name}</div>${chosen?`<div class="altchosen">🔄 Alternativa de: ${original}</div>`:""}<div class="meta">${e[1]} séries × ${e[2]} • Descanso: ${e[3]}</div></div><button class="arrow" onclick="toggleAlt(${i})">⌄</button></div>
+ <div id="alts_${i}" class="alts hidden"><h4>🔄 Exercícios alternativos</h4>${alternatives}${chosen?`<button class="altbtn" onclick="localStorage.removeItem('chosen_${d}_${i}');render()">↩ Voltar ao exercício original</button>`:""}</div>
+ ${sets}
+ <select onchange="set('dif_${d}_${i}',this.value)"><option value="">Dificuldade percebida</option>${["Fácil","Moderado","Pesado","Muito pesado","Falha"].map(x=>`<option ${get(`dif_${d}_${i}`)===x?"selected":""}>${x}</option>`).join("")}</select>
+ <textarea placeholder="📝 Observações: adaptação, dor, técnica, equipamento ou informação importante..." onchange="set('obs_${d}_${i}',this.value)">${get(`obs_${d}_${i}`)}</textarea>
+ <button class="save" onclick="saveHistory(${i})">💾 Registrar esta execução no histórico</button>
+ <button class="historybtn" onclick="showHistory(${i})">📊 Ver últimas execuções</button><div id="hist_${i}" class="hidden"></div>
+ <button class="check" onclick="set('done_${d}_${i}',get('done_${d}_${i}')==='1'?'0':'1');render()">${get(`done_${d}_${i}`)==="1"?"✓ Exercício concluído":"Concluir exercício"}</button></div>`;
+ }).join("");
+
+ app.innerHTML=`<div class="card ${w.type==="cor"?"corinfo":""}"><div class="section-title">${w.t}</div><div class="small">${w.f}</div><div class="small">${done}/${w.e.length} exercícios concluídos</div><div class="progress"><div class="bar" style="width:${done/w.e.length*100}%"></div></div></div>
+ ${w.type==="cor"?`<div class="card corinfo"><b>⚠️ Regra do Coringa</b><div class="small">Use apenas quando estiver bem recuperado. Não é obrigatório. Se houver fadiga, dores persistentes ou queda de desempenho, prefira descanso.</div></div>`:""}
+ <div class="timer">CRONÔMETRO DE DESCANSO<div class="time" id="time">${fmt(sec)}</div><button onclick="start(60)">1:00</button><button onclick="start(90)">1:30</button><button onclick="start(120)">2:00</button><button onclick="start(180)">3:00</button><button onclick="stop()">Parar</button></div>
+ <div class="card">${exercises}</div>
+ <div class="card"><b>📝 Resumo geral do treino</b><div class="small">Registre sono, dores, corrida, recuperação, desempenho e adaptações.</div><textarea id="sum">${get("sum_"+d)}</textarea><button class="save" onclick="set('sum_'+d,document.getElementById('sum').value);alert('Resumo salvo!')">Salvar resumo do treino</button></div>
+ <div class="card"><b>🎯 Estratégia semanal</b><div class="small">A, B e C trabalham o corpo inteiro ao longo da semana. Ombros recebem estímulo direto nos 3 treinos e bíceps recebe estímulo direto nos 3 treinos, além das puxadas e remadas. O Coringa oferece volume adicional para ombros e bíceps quando a recuperação permitir.</div></div>`;
+}
+
+function start(x){clearInterval(timer);sec=x;time.textContent=fmt(sec);timer=setInterval(()=>{sec--;time.textContent=fmt(Math.max(sec,0));if(sec<=0){clearInterval(timer);navigator.vibrate?.([300,150,300]);alert("Descanso concluído!")}},1000)}
+function stop(){clearInterval(timer);sec=0;const t=document.getElementById("time");if(t)t.textContent="00:00"}
+function fmt(x){return String(Math.floor(x/60)).padStart(2,"0")+":"+String(x%60).padStart(2,"0")}
+render();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body>
+</html>
