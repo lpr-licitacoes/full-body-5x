@@ -145,20 +145,18 @@ const ALT={
 
 let d="A",timer=null,sec=0;
 function localDayKey(dt=new Date()){
-  const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");
-  return `${y}-${m}-${dd}`;
+ const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");
+ return y+"-"+m+"-"+dd;
 }
 function weekKey(dt=new Date()){
-  const x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
-  const dow=(x.getDay()+6)%7;
-  x.setDate(x.getDate()-dow);
-  return localDayKey(x);
+ const x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+ const dow=(x.getDay()+6)%7; x.setDate(x.getDate()-dow);
+ return localDayKey(x);
 }
 function parseBRDateKey(s){
-  const m=String(s||"").match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  return m?`${m[3]}-${m[2]}-${m[1]}`:"";
+ const m=String(s||"").match(/(\d{2})\/(\d{2})\/(\d{4})/);
+ return m?m[3]+"-"+m[2]+"-"+m[1]:"";
 }
-
 const key=(d,i,s,f)=>`fb3_${d}_${i}_${s}_${f}`;
 const get=k=>localStorage.getItem(k)||"";
 const set=(k,v)=>localStorage.setItem(k,v);
@@ -171,8 +169,7 @@ function saveHistory(i){
  for(let s=1;s<=ex[1];s++) sets.push({kg:get(key(d,i,s,"kg")),reps:get(key(d,i,s,"reps"))});
  const obs=get(`obs_${d}_${i}`),dif=get(`dif_${d}_${i}`);
  if(!sets.some(x=>x.kg||x.reps)&&!obs&&!dif){alert("Registre algum dado antes de salvar.");return}
- const hk=historyKey(i),hist=JSON.parse(localStorage.getItem(hk)||"[]");
- const today=localDayKey();
+ const hk=historyKey(i),hist=JSON.parse(localStorage.getItem(hk)||"[]"),today=localDayKey();
  const entry={date:new Date().toLocaleString("pt-BR"),dayKey:today,weekKey:weekKey(),sets,obs,dif,name:currentName(i)};
  const idx=hist.findIndex(h=>h.dayKey===today || parseBRDateKey(h.date)===today);
  if(idx>=0) hist[idx]=entry; else hist.unshift(entry);
@@ -202,7 +199,7 @@ function exportWorkoutData(){
   }
   const data={
     app:"Full Body — Personal Virtual",
-    version:"2.4.1",
+    version:"2.4.2",
     exportedAt:new Date().toISOString(),
     workouts:W,
     storage:{}
@@ -282,17 +279,17 @@ function render(){
     <b>🔥 Aquecimento</b>
     <div class="small">Opcional. O aquecimento NÃO entra no volume efetivo.</div>
     <div class="row">
-      <input placeholder="Carga (kg)" inputmode="decimal" value="${get(`warm_${d}_${i}_kg`)}" onchange="set(`warm_${d}_${i}_kg`,this.value)">
-      <input placeholder="Reps" inputmode="numeric" value="${get(`warm_${d}_${i}_reps`)}" onchange="set(`warm_${d}_${i}_reps`,this.value)">
+      <input placeholder="Carga (kg)" inputmode="decimal" value="${get(`warm_${d}_${i}_kg`)}" onchange="set('warm_${d}_${i}_kg',this.value)">
+      <input placeholder="Reps" inputmode="numeric" value="${get(`warm_${d}_${i}_reps`)}" onchange="set('warm_${d}_${i}_reps',this.value)">
     </div>
   </div>
   <div class="effective-label">💪 SÉRIES EFETIVAS — entram na análise</div>
   ${sets}
-  ${e[4]==="CLUSTER"?`<div class="clusterbox"><b>🔹 Registro do CLUSTER</b><div class="small">Registre os blocos realizados. Ex.: 2 + 2 + 2. Microdescanso de 10–20 s.</div><input placeholder="Ex.: 2 + 2 + 2" value="${get(`cluster_${d}_${i}`)}" onchange="set(`cluster_${d}_${i}`,this.value)"></div>`:""}
+  ${e[4]==="CLUSTER"?`<div class="clusterbox"><b>🔹 Registro do CLUSTER</b><div class="small">Registre os blocos realizados. Ex.: 2 + 2 + 2. Microdescanso de 10–20 s.</div><input placeholder="Ex.: 2 + 2 + 2" value="${get(`cluster_${d}_${i}`)}" onchange="set('cluster_${d}_${i}',this.value)"></div>`:""}
   <select onchange="set('dif_${d}_${i}',this.value)"><option value="">Dificuldade percebida</option>${["Fácil","Moderado","Pesado","Muito pesado","Falha"].map(x=>`<option ${get(`dif_${d}_${i}`)===x?"selected":""}>${x}</option>`).join("")}</select>
   <textarea placeholder="📝 Observações: adaptação, dor, técnica, equipamento ou informação importante..." onchange="set('obs_${d}_${i}',this.value)">${get(`obs_${d}_${i}`)}</textarea>
-  <button class="save" onclick="saveHistory(${i})">${(()=>{const h=JSON.parse(localStorage.getItem(historyKey(i))||"[]"),t=localDayKey();return h.some(x=>x.dayKey===t||parseBRDateKey(x.date)===t)?"✏️ Atualizar registro de hoje":"💾 Registrar treino de hoje"})()}</button><button class="historybtn" onclick="showHistory(${i})">📊 Ver últimas execuções</button><div id="hist_${i}" class="hidden"></div>
-  <button class="check" onclick="set(`done_${weekKey()}_${d}_${i}`,get(`done_${weekKey()}_${d}_${i}`)==='1'?'0':'1');render()">${get(`done_${weekKey()}_${d}_${i}`)==="1"?"✓ Exercício concluído":"Concluir exercício"}</button></div>`
+  <button class="save" onclick="saveHistory(${i})">💾 Registrar / atualizar treino</button><button class="historybtn" onclick="showHistory(${i})">📊 Ver últimas execuções</button><div id="hist_${i}" class="hidden"></div>
+  <button class="check" onclick="set('done_'+weekKey()+'_${d}_${i}',get('done_'+weekKey()+'_${d}_${i}')==='1'?'0':'1');render()">${get(`done_${weekKey()}_${d}_${i}`)==="1"?"✓ Exercício concluído":"Concluir exercício"}</button></div>`
  }).join("");
  app.innerHTML=`<div class="card ${w.type==="cor"?"corinfo":""}"><div class="section-title">${w.t}</div><div class="small">${w.f}</div><div class="timegoal">⏱️ Tempo-alvo: ${w.time}</div><div class="small">${done}/${w.e.length} exercícios concluídos</div><div class="progress"><div class="bar" style="width:${done/w.e.length*100}%"></div></div></div>
  ${w.type==="cor"?`<div class="card corinfo"><b>Regra do Coringa</b><div class="small">Opcional. Faça apenas se estiver recuperado. Se houver queda de desempenho, fadiga importante ou dor persistente, não use volume extra.</div></div>`:""}
