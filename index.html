@@ -145,48 +145,36 @@ const ALT={
 
 let d="A",timer=null,sec=0;
 function localDayKey(dt=new Date()){
-  const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),day=String(dt.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
+  const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,"0"),dd=String(dt.getDate()).padStart(2,"0");
+  return `${y}-${m}-${dd}`;
 }
 function weekKey(dt=new Date()){
   const x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
-  const dow=(x.getDay()+6)%7; x.setDate(x.getDate()-dow);
+  const dow=(x.getDay()+6)%7;
+  x.setDate(x.getDate()-dow);
   return localDayKey(x);
 }
-const WK=()=>weekKey();
-const key=(d,i,s,f)=>`fb3_${WK()}_${d}_${i}_${s}_${f}`;
-const doneKey=(d,i)=>`done_${WK()}_${d}_${i}`;
-const obsKey=(d,i)=>`obs_${WK()}_${d}_${i}`;
-const difKey=(d,i)=>`dif_${WK()}_${d}_${i}`;
-const clusterKey=(d,i)=>`cluster_${WK()}_${d}_${i}`;
-const warmKey=(d,i,f)=>`warm_${WK()}_${d}_${i}_${f}`;
-const sumKey=d=>`sum_${WK()}_${d}`;
-const get=k=>localStorage.getItem(k)||"";
-const set=(k,v)=>localStorage.setItem(k,v);
-function currentName(i){return get(`chosen_${WK()}_${d}_${i}`)||W[d].e[i][0]}
-function exerciseId(name){return name.replace(/[^a-zA-Z0-9]/g,"_")}
-function historyKey(i){return "history_fb3_"+exerciseId(currentName(i))}
-function chooseAlt(i,name){const original=W[d].e[i][0];set(`chosen_${WK()}_${d}_${i}`,name);set(obsKey(d,i),`Substituição: ${original} → ${name}. `);render()}
 function parseBRDateKey(s){
-  const m=String(s).match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  const m=String(s||"").match(/(\d{2})\/(\d{2})\/(\d{4})/);
   return m?`${m[3]}-${m[2]}-${m[1]}`:"";
 }
-function hasTodayRecord(i){
-  const hist=JSON.parse(localStorage.getItem(historyKey(i))||"[]");
-  const today=localDayKey();
-  return hist.some(h=>h.dayKey===today || (h.date && parseBRDateKey(h.date)===today));
-}
+
+const key=(d,i,s,f)=>`fb3_${d}_${i}_${s}_${f}`;
+const get=k=>localStorage.getItem(k)||"";
+const set=(k,v)=>localStorage.setItem(k,v);
+function currentName(i){return get(`chosen_${d}_${i}`)||W[d].e[i][0]}
+function exerciseId(name){return name.replace(/[^a-zA-Z0-9]/g,"_")}
+function historyKey(i){return "history_fb3_"+exerciseId(currentName(i))}
+function chooseAlt(i,name){const original=W[d].e[i][0];set(`chosen_${d}_${i}`,name);set(`obs_${d}_${i}`,`Substituição: ${original} → ${name}. `);render()}
 function saveHistory(i){
  const ex=W[d].e[i],sets=[];
  for(let s=1;s<=ex[1];s++) sets.push({kg:get(key(d,i,s,"kg")),reps:get(key(d,i,s,"reps"))});
- const obs=get(obsKey(d,i)),dif=get(difKey(d,i)),cluster=get(clusterKey(d,i));
- const warmup={kg:get(warmKey(d,i,"kg")),reps:get(warmKey(d,i,"reps"))};
- if(!sets.some(x=>x.kg||x.reps)&&!obs&&!dif&&!cluster&&!warmup.kg&&!warmup.reps){alert("Registre algum dado antes de salvar.");return}
- const hk=historyKey(i);
- const hist=JSON.parse(localStorage.getItem(hk)||"[]");
+ const obs=get(`obs_${d}_${i}`),dif=get(`dif_${d}_${i}`);
+ if(!sets.some(x=>x.kg||x.reps)&&!obs&&!dif){alert("Registre algum dado antes de salvar.");return}
+ const hk=historyKey(i),hist=JSON.parse(localStorage.getItem(hk)||"[]");
  const today=localDayKey();
- const idx=hist.findIndex(h=>h.dayKey===today || (h.date && parseBRDateKey(h.date)===today));
- const entry={date:new Date().toLocaleString("pt-BR"),dayKey:today,weekKey:WK(),sets,obs,dif,cluster,warmup,name:currentName(i)};
+ const entry={date:new Date().toLocaleString("pt-BR"),dayKey:today,weekKey:weekKey(),sets,obs,dif,name:currentName(i)};
+ const idx=hist.findIndex(h=>h.dayKey===today || parseBRDateKey(h.date)===today);
  if(idx>=0) hist[idx]=entry; else hist.unshift(entry);
  localStorage.setItem(hk,JSON.stringify(hist.slice(0,50)));
  alert(idx>=0?"Registro de hoje atualizado!":"Treino de hoje registrado!");
@@ -210,11 +198,11 @@ function exportWorkoutData(){
   const prefixKeys=[];
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
-    if(k && (k.startsWith("fb3_") || k.startsWith("history_fb3_") || k.startsWith("chosen_") || k.startsWith("obs_") || k.startsWith("dif_") || k.startsWith("done_") || k.startsWith("sum_") || k.startsWith("warm_") || k.startsWith("cluster_"))) prefixKeys.push(k);
+    if(k && (k.startsWith("fb3_") || k.startsWith("history_fb3_") || k.startsWith("chosen_") || k.startsWith("obs_") || k.startsWith("dif_") || k.startsWith("done_") || k.startsWith("sum_"))) prefixKeys.push(k);
   }
   const data={
     app:"Full Body — Personal Virtual",
-    version:"2.4",
+    version:"2.4.1",
     exportedAt:new Date().toISOString(),
     workouts:W,
     storage:{}
@@ -281,37 +269,37 @@ function showWeeklySummary(){
 
 function render(){
  tabs.innerHTML=Object.keys(W).map(x=>`<button class="tab ${x===d?"active":""}" onclick="d='${x}';render()">${x==="CORINGA"?"🃏 CORINGA":"TREINO "+x}</button>`).join("");
- const w=W[d],done=w.e.filter((_,i)=>get(doneKey(d,i))==="1").length;
+ const w=W[d],done=w.e.filter((_,i)=>get(`done_${weekKey()}_${d}_${i}`)==="1").length;
  const exercises=w.e.map((e,i)=>{
   const original=e[0],name=currentName(i),chosen=name!==original;
   let sets="";for(let s=1;s<=e[1];s++)sets+=`<div class="set"><div class="settitle">SÉRIE EFETIVA ${s}<span class="badge">${e[2]} reps</span></div><div class="row"><input placeholder="Peso (kg)" inputmode="decimal" value="${get(key(d,i,s,"kg"))}" onchange="set('${key(d,i,s,"kg")}',this.value)"><input placeholder="Repetições feitas" inputmode="numeric" value="${get(key(d,i,s,"reps"))}" onchange="set('${key(d,i,s,"reps")}',this.value)"></div></div>`;
   const alternatives=(ALT[original]||[]).map(a=>`<div class="altitem"><b>${a[0]}</b><span>${a[1]}</span><button class="altbtn" onclick="chooseAlt(${i},'${a[0]}')">Usar esta alternativa hoje</button></div>`).join("")||"<div class='small'>Nenhuma alternativa cadastrada ainda.</div>";
-  return `<div class="exercise ${get(doneKey(d,i))==="1"?"done":""}">
+  return `<div class="exercise ${get(`done_${weekKey()}_${d}_${i}`)==="1"?"done":""}">
   <div class="exhead"><div><div class="exname">${i+1}. ${name}</div>${chosen?`<div class="altchosen">🔄 Alternativa de: ${original}</div>`:""}<div class="meta">${e[1]} séries × ${e[2]} • Descanso: ${e[3]}</div>
   <div class="stim"><span class="stimname">${e[4]}</span><button class="infoBtn" onclick="info('${e[4]}')">i</button></div><div class="small"><b>${e[4]==="BI-SET"?"Como fazer: execute com o exercício BI-SET consecutivo, depois descanse.":e[4]==="CLUSTER"?"Como fazer: divida as reps em blocos com 10–20s de microdescanso.":e[4]==="DROP-SET"?"Como fazer: última série, reduza 20–30% da carga e continue.":e[4]==="REST-PAUSE"?"Como fazer: após a série, 15–20s de pausa e mais algumas reps.":"Como fazer: repetições contínuas com técnica controlada."}</b></div></div><button class="arrow" onclick="toggleAlt(${i})">⌄</button></div>
-  <div id="alts_${i}" class="alts hidden"><h4>🔄 Exercícios alternativos</h4>${alternatives}${chosen?`<button class="altbtn" onclick="localStorage.removeItem(`chosen_${WK()}_${d}_${i}`);render()">↩ Voltar ao exercício original</button>`:""}</div>
+  <div id="alts_${i}" class="alts hidden"><h4>🔄 Exercícios alternativos</h4>${alternatives}${chosen?`<button class="altbtn" onclick="localStorage.removeItem('chosen_${d}_${i}');render()">↩ Voltar ao exercício original</button>`:""}</div>
   <div class="warmup">
     <b>🔥 Aquecimento</b>
     <div class="small">Opcional. O aquecimento NÃO entra no volume efetivo.</div>
     <div class="row">
-      <input placeholder="Carga (kg)" inputmode="decimal" value="${get(warmKey(d,i,"kg"))}" onchange="set(warmKey(d,i,"kg"),this.value)">
-      <input placeholder="Reps" inputmode="numeric" value="${get(warmKey(d,i,"reps"))}" onchange="set(warmKey(d,i,"reps"),this.value)">
+      <input placeholder="Carga (kg)" inputmode="decimal" value="${get(`warm_${d}_${i}_kg`)}" onchange="set(`warm_${d}_${i}_kg`,this.value)">
+      <input placeholder="Reps" inputmode="numeric" value="${get(`warm_${d}_${i}_reps`)}" onchange="set(`warm_${d}_${i}_reps`,this.value)">
     </div>
   </div>
   <div class="effective-label">💪 SÉRIES EFETIVAS — entram na análise</div>
   ${sets}
-  ${e[4]==="CLUSTER"?`<div class="clusterbox"><b>🔹 Registro do CLUSTER</b><div class="small">Registre os blocos realizados. Ex.: 2 + 2 + 2. Microdescanso de 10–20 s.</div><input placeholder="Ex.: 2 + 2 + 2" value="${get(clusterKey(d,i))}" onchange="set(clusterKey(d,i),this.value)"></div>`:""}
-  <select onchange="set(difKey(d,i),this.value)"><option value="">Dificuldade percebida</option>${["Fácil","Moderado","Pesado","Muito pesado","Falha"].map(x=>`<option ${get(difKey(d,i))===x?"selected":""}>${x}</option>`).join("")}</select>
-  <textarea placeholder="📝 Observações: adaptação, dor, técnica, equipamento ou informação importante..." onchange="set('obs_${d}_${i}',this.value)">${get(obsKey(d,i))}</textarea>
-  <button class="save" onclick="saveHistory(${i})">${hasTodayRecord(i)?"✏️ Atualizar registro de hoje":"💾 Registrar treino de hoje"}</button><button class="historybtn" onclick="showHistory(${i})">📊 Ver últimas execuções</button><div id="hist_${i}" class="hidden"></div>
-  <button class="check" onclick="set(doneKey(d,i),get(doneKey(d,i))==='1'?'0':'1');render()">${get(doneKey(d,i))==="1"?"✓ Exercício concluído":"Concluir exercício"}</button></div>`
+  ${e[4]==="CLUSTER"?`<div class="clusterbox"><b>🔹 Registro do CLUSTER</b><div class="small">Registre os blocos realizados. Ex.: 2 + 2 + 2. Microdescanso de 10–20 s.</div><input placeholder="Ex.: 2 + 2 + 2" value="${get(`cluster_${d}_${i}`)}" onchange="set(`cluster_${d}_${i}`,this.value)"></div>`:""}
+  <select onchange="set('dif_${d}_${i}',this.value)"><option value="">Dificuldade percebida</option>${["Fácil","Moderado","Pesado","Muito pesado","Falha"].map(x=>`<option ${get(`dif_${d}_${i}`)===x?"selected":""}>${x}</option>`).join("")}</select>
+  <textarea placeholder="📝 Observações: adaptação, dor, técnica, equipamento ou informação importante..." onchange="set('obs_${d}_${i}',this.value)">${get(`obs_${d}_${i}`)}</textarea>
+  <button class="save" onclick="saveHistory(${i})">${(()=>{const h=JSON.parse(localStorage.getItem(historyKey(i))||"[]"),t=localDayKey();return h.some(x=>x.dayKey===t||parseBRDateKey(x.date)===t)?"✏️ Atualizar registro de hoje":"💾 Registrar treino de hoje"})()}</button><button class="historybtn" onclick="showHistory(${i})">📊 Ver últimas execuções</button><div id="hist_${i}" class="hidden"></div>
+  <button class="check" onclick="set(`done_${weekKey()}_${d}_${i}`,get(`done_${weekKey()}_${d}_${i}`)==='1'?'0':'1');render()">${get(`done_${weekKey()}_${d}_${i}`)==="1"?"✓ Exercício concluído":"Concluir exercício"}</button></div>`
  }).join("");
- app.innerHTML=`<div class="card ${w.type==="cor"?"corinfo":""}"><div class="section-title">${w.t}</div><div class="small">${w.f}</div><div class="small"><b>📅 Semana iniciada em ${WK().split("-").reverse().join("/")}</b> • ao virar a semana, os exercícios são liberados automaticamente.</div><div class="timegoal">⏱️ Tempo-alvo: ${w.time}</div><div class="small">${done}/${w.e.length} exercícios concluídos</div><div class="progress"><div class="bar" style="width:${done/w.e.length*100}%"></div></div></div>
+ app.innerHTML=`<div class="card ${w.type==="cor"?"corinfo":""}"><div class="section-title">${w.t}</div><div class="small">${w.f}</div><div class="timegoal">⏱️ Tempo-alvo: ${w.time}</div><div class="small">${done}/${w.e.length} exercícios concluídos</div><div class="progress"><div class="bar" style="width:${done/w.e.length*100}%"></div></div></div>
  ${w.type==="cor"?`<div class="card corinfo"><b>Regra do Coringa</b><div class="small">Opcional. Faça apenas se estiver recuperado. Se houver queda de desempenho, fadiga importante ou dor persistente, não use volume extra.</div></div>`:""}
  <div class="card goal"><b>🎯 Regra de progressão</b><div class="small">As séries agora são <b>variadas</b> (2, 3 ou 4 conforme o exercício). Quando atingir o topo da faixa com boa técnica e dificuldade controlada, a próxima sessão pode pedir aumento de carga. As técnicas intensificadoras não substituem o controle de recuperação.</div></div>
  <div class="timer">CRONÔMETRO DE DESCANSO<div class="time" id="time">${fmt(sec)}</div><button onclick="start(45)">0:45</button><button onclick="start(60)">1:00</button><button onclick="start(90)">1:30</button><button onclick="start(120)">2:00</button><button onclick="start(180)">3:00</button><button onclick="stop()">Parar</button></div>
  <div class="card">${exercises}</div>
- <div class="card"><b>📝 Resumo geral</b><div class="small">Sono, corrida, recuperação, dores, disposição e qualquer adaptação importante.</div><textarea id="sum">${get(sumKey(d))}</textarea><button class="save" onclick="set(sumKey(d),document.getElementById('sum').value);alert('Resumo salvo!')">Salvar resumo</button></div>
+ <div class="card"><b>📝 Resumo geral</b><div class="small">Sono, corrida, recuperação, dores, disposição e qualquer adaptação importante.</div><textarea id="sum">${get("sum_"+d)}</textarea><button class="save" onclick="set('sum_'+d,document.getElementById('sum').value);alert('Resumo salvo!')">Salvar resumo</button></div>
  <div class="card"><b>📈 O que será acompanhado</b><div class="small">Carga, repetições, dificuldade, consistência, volume e observações. A análise semanal pode usar esses dados para ajustar progressão, volume, número de séries e técnicas.</div></div>`
 }
 function start(x){clearInterval(timer);sec=x;time.textContent=fmt(sec);timer=setInterval(()=>{sec--;time.textContent=fmt(Math.max(sec,0));if(sec<=0){clearInterval(timer);navigator.vibrate?.([300,150,300]);alert("Descanso concluído!")}},1000)}
